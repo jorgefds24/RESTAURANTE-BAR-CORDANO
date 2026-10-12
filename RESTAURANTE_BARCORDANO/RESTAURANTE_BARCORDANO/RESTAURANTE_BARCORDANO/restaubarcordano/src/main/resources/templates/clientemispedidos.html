@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mis Pedidos — Bar Cordano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=EB+Garamond:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --crema:#F5EDD8; --crema-suave:#FAF6ED; --crema-paper:#EDE5CC;
+            --cafe:#2C1508; --cafe-oscuro:#1A0A03; --cafe-medio:#5A2E12;
+            --oro:#C9963A; --oro-claro:#E8C06A; --borde:rgba(59,31,14,.15);
+            --borde-oro:rgba(201,150,58,.3); --texto:#3B1F0E;
+            --texto-muted:rgba(59,31,14,.45); --sombra:0 2px 20px rgba(44,21,8,.08);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'EB Garamond',Georgia,serif;background:var(--crema-suave);color:var(--texto);min-height:100vh;}
+        nav{background:var(--cafe-oscuro);border-bottom:2px solid var(--oro);height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;position:sticky;top:0;z-index:50;}
+        .nav-brand{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--oro);text-decoration:none;}
+        .nav-links{display:flex;gap:2rem;list-style:none;}
+        .nav-links a{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,230,206,.5);text-decoration:none;transition:color .2s;}
+        .nav-links a:hover,.nav-links a.active{color:var(--oro);}
+        .nav-links a.logout{color:#DF8A8A;}
+        .hero{background:var(--cafe);padding:2.5rem 3rem;border-bottom:1px solid rgba(201,150,58,.2);}
+        .hero p{font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(201,150,58,.7);margin-bottom:.4rem;}
+        .hero h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-style:italic;color:var(--crema);}
+        .page{max-width:900px;margin:0 auto;padding:2.5rem 2rem;}
+        .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--borde);border:1px solid var(--borde);margin-bottom:1.8rem;}
+        .stat-item{background:white;padding:1.2rem 1.5rem;text-align:center;}
+        .stat-valor{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--cafe);line-height:1;}
+        .stat-label{font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--texto-muted);margin-top:.3rem;}
+        .top-action{display:flex;justify-content:flex-end;margin-bottom:1.2rem;}
+        .btn-nuevo{font-family:'EB Garamond',serif;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;background:var(--cafe);color:var(--crema);border:none;cursor:pointer;padding:.7rem 1.8rem;text-decoration:none;display:inline-block;transition:background .2s,transform .18s;}
+        .btn-nuevo:hover{background:var(--cafe-medio);transform:translateY(-2px);}
+        .pedido-card{background:white;border:1px solid var(--borde);box-shadow:var(--sombra);margin-bottom:1rem;animation:fadeUp .4s ease both;}
+        .pedido-header{padding:1.2rem 1.8rem;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;}
+        .pedido-id{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--texto-muted);}
+        .pedido-fecha{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--texto-muted);}
+        /* Tabla de detalles */
+        .detalle-tabla{width:100%;border-collapse:collapse;font-size:.88rem;}
+        .detalle-tabla th{padding:.55rem 1.8rem;text-align:left;font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--texto-muted);border-bottom:1px solid var(--borde);font-weight:400;}
+        .detalle-tabla th:nth-child(2),.detalle-tabla th:nth-child(3),.detalle-tabla th:nth-child(4){text-align:right;}
+        .detalle-tabla td{padding:.65rem 1.8rem;color:var(--cafe);border-bottom:1px solid rgba(59,31,14,.06);}
+        .detalle-tabla td:nth-child(2),.detalle-tabla td:nth-child(3),.detalle-tabla td:nth-child(4){text-align:right;font-family:'DM Mono',monospace;font-size:.82rem;}
+        .detalle-tabla tr:last-child td{border-bottom:none;}
+        .detalle-nombre{font-family:'Playfair Display',serif;font-weight:700;}
+        .pedido-footer{padding:1rem 1.8rem;background:var(--crema-paper);border-top:1px solid var(--borde-oro);display:flex;align-items:center;justify-content:space-between;}
+        .pedido-obs{font-size:.82rem;color:var(--texto-muted);font-style:italic;}
+        .pedido-total{font-family:'DM Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--cafe);}
+        .badge{display:inline-block;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;padding:.25rem .7rem;font-family:'DM Mono',monospace;}
+        .badge-pendiente{background:rgba(201,150,58,.1);color:#8A6020;border:1px solid rgba(201,150,58,.25);}
+        .badge-preparacion{background:rgba(42,80,180,.08);color:#3A5AAF;border:1px solid rgba(42,80,180,.2);}
+        .badge-entregado{background:rgba(42,90,42,.08);color:#2A6A2A;border:1px solid rgba(42,90,42,.2);}
+        .badge-cancelado{background:rgba(139,26,26,.08);color:#8B1A1A;border:1px solid rgba(139,26,26,.18);}
+        .empty-card{background:white;border:1px solid var(--borde);padding:4rem 2rem;text-align:center;}
+        .empty-card p{font-size:1rem;color:var(--texto-muted);font-style:italic;margin-bottom:1.5rem;}
+        footer{text-align:center;padding:2rem;border-top:1px solid var(--borde);margin-top:2rem;}
+        footer p{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--texto-muted);}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="#" class="nav-brand">Bar Cordano · 1905</a>
+    <ul class="nav-links">
+        <li><a href="/PedidoCliente">Hacer Pedido</a></li>
+        <li><a href="/MispedidosCliente" class="active">Mis Pedidos</a></li>
+        <li><a href="/ReservaCliente">Hacer Reserva</a></li>
+        <li><a href="/MisreservasCliente">Mis Reservas</a></li>
+        <li><a th:href="@{/logout-cliente}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout">Cerrar Sesión</a></li>
+    </ul>
+</nav>
+
+<div class="hero">
+    <p>Bar Restaurante Cordano</p>
+    <h1>📋 Mis Pedidos</h1>
+</div>
+
+<div class="page">
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-valor" th:text="${#lists.size(listaPedidos)}">0</div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-valor" th:text="${#lists.size(listaPedidos.?[estado == 'PENDIENTE'])}">0</div>
+            <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-valor" th:text="${#lists.size(listaPedidos.?[estado == 'EN_PREPARACION'])}">0</div>
+            <div class="stat-label">En preparación</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-valor" th:text="${#lists.size(listaPedidos.?[estado == 'ENTREGADO'])}">0</div>
+            <div class="stat-label">Entregados</div>
+        </div>
+    </div>
+
+    <div class="top-action">
+        <a href="/PedidoCliente" class="btn-nuevo">+ Nuevo Pedido</a>
+    </div>
+
+    <div class="empty-card" th:if="${#lists.isEmpty(listaPedidos)}">
+        <p>Aún no tienes pedidos registrados.</p>
+        <a href="/PedidoCliente" class="btn-nuevo">Hacer mi primer pedido</a>
+    </div>
+
+    <div th:each="pedido : ${listaPedidos}" class="pedido-card">
+        <div class="pedido-header">
+            <span class="pedido-id" th:text="'Pedido #' + ${pedido.idpedido}"></span>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <span class="pedido-fecha" th:text="${pedido.fecha_hora}"></span>
+                <span th:if="${pedido.estado == 'PENDIENTE'}"      class="badge badge-pendiente">Pendiente</span>
+                <span th:if="${pedido.estado == 'EN_PREPARACION'}" class="badge badge-preparacion">En Prep.</span>
+                <span th:if="${pedido.estado == 'ENTREGADO'}"      class="badge badge-entregado">Entregado</span>
+                <span th:if="${pedido.estado == 'CANCELADO'}"      class="badge badge-cancelado">Cancelado</span>
+            </div>
+        </div>
+
+        <!-- Tabla de productos del pedido -->
+        <table class="detalle-tabla">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cant.</th>
+                    <th>Precio unit.</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="detalle : ${pedido.detalles}">
+                    <td class="detalle-nombre" th:text="${detalle.menu.nombre}"></td>
+                    <td th:text="${detalle.cantidad}"></td>
+                    <td th:text="'S/ ' + ${detalle.precio_unit}"></td>
+                    <td th:text="'S/ ' + ${detalle.subtotal}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pedido-footer">
+            <span class="pedido-obs"
+                  th:if="${pedido.observaciones != null and pedido.observaciones != ''}"
+                  th:text="'Obs: ' + ${pedido.observaciones}"></span>
+            <span class="pedido-obs" th:if="${pedido.observaciones == null or pedido.observaciones == ''}"></span>
+            <span class="pedido-total" th:text="'Total: S/ ' + ${pedido.total}"></span>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <p>Bar Restaurante Cordano &nbsp;·&nbsp; Jr. Áncash 202, Lima &nbsp;·&nbsp; Desde 1905</p>
+</footer>
+
+<form id="logout-form" th:action="@{/cerrar-cliente}" method="post" style="display:none;"></form>
+</body>
+</html>

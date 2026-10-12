@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Iniciar Sesión — Bar Cordano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=EB+Garamond:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --cafe:        #1A0A03;
+            --cafe-card:   #1F0D05;
+            --oro:         #C9963A;
+            --oro-claro:   #E8C06A;
+            --crema:       #F0E6CE;
+            --crema-dim:   rgba(240,230,206,.5);
+            --borde:       rgba(201,150,58,.14);
+            --borde-hover: rgba(201,150,58,.4);
+            --texto-muted: rgba(240,230,206,.35);
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'EB Garamond', Georgia, serif;
+            background: var(--cafe);
+            color: var(--crema);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,150,58,.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,150,58,.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeDown .5s ease both;
+            position: relative; z-index: 1;
+        }
+        .brand-ornamento {
+            font-size: .63rem; letter-spacing: .55em;
+            text-transform: uppercase; color: var(--oro); margin-bottom: .6rem;
+        }
+        .brand-nombre {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem; font-style: italic; font-weight: 900;
+            color: var(--crema); line-height: 1;
+        }
+        .brand-año {
+            font-family: 'DM Mono', monospace;
+            font-size: .7rem; color: var(--texto-muted);
+            letter-spacing: .3em; margin-top: .4rem;
+        }
+        .card {
+            width: 100%; max-width: 420px;
+            background: var(--cafe-card);
+            border: 1px solid var(--borde);
+            animation: fadeDown .5s .1s ease both;
+            position: relative; z-index: 1;
+        }
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--borde);
+            display: flex; align-items: center; gap: .8rem;
+        }
+        .card-header-icon { font-size: 1.3rem; opacity: .8; }
+        .card-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem; font-style: italic;
+            font-weight: 700; color: var(--crema);
+        }
+        .card-header p {
+            font-size: .62rem; letter-spacing: .2em;
+            text-transform: uppercase; color: var(--texto-muted); margin-top: .15rem;
+        }
+        .card-body { padding: 2rem 2rem 0 2rem; }
+        .alert-error {
+            background: rgba(139,26,26,.15);
+            border: 1px solid rgba(139,26,26,.35);
+            color: #DF8A8A; font-size: .85rem;
+            padding: .8rem 1rem; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .alert-success {
+            background: rgba(26,139,26,.15);
+            border: 1px solid rgba(26,139,26,.35);
+            color: #8ADF8A; font-size: .85rem;
+            padding: .8rem 1rem; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: .5rem;
+        }
+        .form-group { margin-bottom: 1.3rem; }
+        .form-group label {
+            display: block; font-size: .6rem;
+            letter-spacing: .32em; text-transform: uppercase;
+            color: var(--texto-muted); margin-bottom: .45rem;
+        }
+        .form-group input {
+            width: 100%; font-family: 'EB Garamond', serif;
+            font-size: 1rem; padding: .85rem 1rem;
+            background: rgba(240,230,206,.04);
+            border: 1px solid var(--borde);
+            color: var(--crema); outline: none;
+            transition: border-color .22s, background .22s;
+        }
+        .form-group input:focus {
+            border-color: var(--oro);
+            background: rgba(201,150,58,.05);
+        }
+        .form-group input::placeholder { color: var(--texto-muted); font-style: italic; }
+        .card-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--borde);
+            margin-top: 1.5rem;
+            display: flex; flex-direction: column; gap: .9rem;
+        }
+        .btn-primary {
+            width: 100%; font-family: 'EB Garamond', serif;
+            font-size: .82rem; letter-spacing: .3em; text-transform: uppercase;
+            background: var(--oro); color: var(--cafe);
+            border: none; cursor: pointer; padding: 1rem;
+            transition: background .2s, transform .18s;
+        }
+        .btn-primary:hover { background: var(--oro-claro); transform: translateY(-2px); }
+        .link-alt {
+            text-align: center; font-size: .8rem; color: var(--texto-muted);
+        }
+        .link-alt a { color: var(--oro); text-decoration: none; }
+        .link-alt a:hover { color: var(--oro-claro); }
+        .divider {
+            display: flex; align-items: center; gap: .8rem;
+            margin-bottom: 1.3rem;
+        }
+        .divider span {
+            font-size: .58rem; letter-spacing: .3em;
+            text-transform: uppercase; color: var(--texto-muted);
+            white-space: nowrap;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--borde);
+        }
+        .page-footer {
+            margin-top: 2rem; text-align: center;
+            animation: fadeDown .5s .2s ease both;
+            position: relative; z-index: 1;
+        }
+        .page-footer p {
+            font-size: .62rem; letter-spacing: .22em;
+            text-transform: uppercase; color: var(--texto-muted);
+        }
+        @keyframes fadeDown {
+            from { opacity:0; transform: translateY(-12px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand">
+        <div class="brand-ornamento">✦ Panel de Administración ✦</div>
+        <div class="brand-nombre">Bar Cordano</div>
+        <div class="brand-año">Lima · Desde 1905</div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">🔐</div>
+            <div>
+                <h2>Iniciar Sesión</h2>
+                <p>Acceso exclusivo para administradores</p>
+            </div>
+        </div>
+
+        <!--
+            IMPORTANTE para Spring Security:
+            - th:action apunta a /login-admin  (loginProcessingUrl definido en SecurityConfig)
+            - name="username"  (Spring Security lee este campo exacto)
+            - name="password"  (Spring Security lee este campo exacto)
+        -->
+        <form th:action="@{/login-admin}" method="post">
+            <div class="card-body">
+
+                <!-- Error de credenciales -->
+                <div class="alert-error" th:if="${param.error != null}">
+                    ⚠ Usuario o contraseña incorrectos.
+                </div>
+
+                <!-- Mensaje tras cerrar sesión -->
+                <div class="alert-success" th:if="${param.logout != null}">
+                    ✔ Sesión cerrada correctamente.
+                </div>
+
+                <!-- Mensaje tras registrarse -->
+                <div class="alert-success" th:if="${param.registrado != null}">
+                    ✔ Cuenta creada. Ya puedes iniciar sesión.
+                </div>
+
+                <div class="divider"><span>Ingresa tus credenciales</span></div>
+
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text"
+                           name="username"
+                           placeholder="Ingresa tu usuario"
+                           autocomplete="off"
+                           required/>
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password"
+                           name="password"
+                           placeholder="Ingresa tu contraseña"
+                           required/>
+                </div>
+
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn-primary">Ingresar al Sistema</button>
+                <p class="link-alt">¿No tienes cuenta? <a th:href="@{/RegistroAdministrador}">Crear cuenta</a></p>
+            </div>
+        </form>
+    </div>
+
+    <div class="page-footer">
+        <p>Bar Restaurante Cordano &nbsp;·&nbsp; Jr. Áncash 202, Lima</p>
+    </div>
+
+</body>
+</html>

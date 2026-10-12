@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mesa — Bar Cordano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=EB+Garamond:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --cafe:        #1A0A03;
+            --cafe-card:   #1F0D05;
+            --cafe-sidebar:#0D0401;
+            --oro:         #C9963A;
+            --oro-claro:   #E8C06A;
+            --crema:       #F0E6CE;
+            --crema-dim:   rgba(240,230,206,.5);
+            --borde:       rgba(201,150,58,.14);
+            --borde-hover: rgba(201,150,58,.4);
+            --texto-muted: rgba(240,230,206,.35);
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'EB Garamond', Georgia, serif;
+            background: var(--cafe); color: var(--crema); min-height: 100vh;
+        }
+        nav {
+            height: 60px; background: var(--cafe-sidebar);
+            border-bottom: 1px solid var(--borde);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2.5rem; position: sticky; top: 0; z-index: 50;
+        }
+        .nav-brand { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-style: italic; color: var(--oro); }
+        .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+        .nav-links a {
+            font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+            color: rgba(240,230,206,.5); text-decoration: none; transition: color .2s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--oro); }
+        .page { max-width: 600px; margin: 0 auto; padding: 3rem 2rem; }
+        .breadcrumb {
+            display: flex; align-items: center; gap: .6rem; margin-bottom: 2rem;
+            font-size: .65rem; letter-spacing: .25em; text-transform: uppercase;
+            color: var(--texto-muted); animation: fadeDown .4s ease both;
+        }
+        .breadcrumb a { color: var(--oro); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--oro-claro); }
+        .form-card {
+            background: var(--cafe-card); border: 1px solid var(--borde);
+            animation: fadeDown .4s .08s ease both;
+        }
+        .form-card-header {
+            padding: 1.5rem 2rem; border-bottom: 1px solid var(--borde);
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .form-card-header-icon { font-size: 1.4rem; opacity: .7; }
+        .form-card-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem; font-style: italic; font-weight: 700; color: var(--crema);
+        }
+        .form-card-header p {
+            font-size: .68rem; letter-spacing: .2em;
+            text-transform: uppercase; color: var(--texto-muted); margin-top: .2rem;
+        }
+        .form-body { padding: 2rem; }
+        .form-section-label {
+            font-size: .6rem; letter-spacing: .38em; text-transform: uppercase;
+            color: var(--oro); margin-bottom: 1.2rem; margin-top: 1.8rem;
+            display: flex; align-items: center; gap: .7rem;
+        }
+        .form-section-label:first-child { margin-top: 0; }
+        .form-section-label::after { content: ''; flex: 1; height: 1px; background: var(--borde); }
+        .form-group { margin-bottom: 1.3rem; }
+        .form-group label {
+            display: block; font-size: .62rem; letter-spacing: .3em;
+            text-transform: uppercase; color: var(--texto-muted); margin-bottom: .45rem;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%; font-family: 'EB Garamond', serif; font-size: 1rem;
+            padding: .8rem 1rem; background: rgba(240,230,206,.04);
+            border: 1px solid var(--borde); color: var(--crema);
+            outline: none; transition: border-color .22s, background .22s; appearance: none;
+        }
+        .form-group input:focus,
+        .form-group select:focus { border-color: var(--oro); background: rgba(201,150,58,.05); }
+        .form-group select option { background: #1F0D05; color: var(--crema); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-hint { font-size: .72rem; color: var(--texto-muted); font-style: italic; margin-top: .3rem; }
+        .form-footer {
+            padding: 1.5rem 2rem; border-top: 1px solid var(--borde);
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        }
+        .btn-guardar {
+            font-family: 'EB Garamond', serif; font-size: .78rem; letter-spacing: .25em;
+            text-transform: uppercase; background: var(--oro); color: var(--cafe);
+            border: none; cursor: pointer; padding: .85rem 2.2rem;
+            transition: background .2s, transform .18s;
+        }
+        .btn-guardar:hover { background: var(--oro-claro); transform: translateY(-2px); }
+        .btn-cancelar {
+            font-family: 'EB Garamond', serif; font-size: .75rem; letter-spacing: .22em;
+            text-transform: uppercase; background: transparent; color: var(--crema-dim);
+            border: 1px solid var(--borde); cursor: pointer; padding: .85rem 1.8rem;
+            text-decoration: none; display: inline-block; transition: all .2s;
+        }
+        .btn-cancelar:hover { border-color: var(--borde-hover); color: var(--crema); }
+        footer {
+            text-align: center; padding: 2rem;
+            border-top: 1px solid var(--borde); margin-top: 3rem;
+        }
+        footer p { font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--texto-muted); }
+        @keyframes fadeDown {
+            from { opacity:0; transform: translateY(-10px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <span class="nav-brand">Bar Cordano · 1905</span>
+    <ul class="nav-links">
+        <li><a href="/indexmes" class="active">Mesas</a></li>
+        <li><a href="/indexmenu">Menú</a></li>
+        <li><a href="/indexres">Reservas</a></li>
+        <li><a href="/indexped">Pedidos</a></li>
+        <li><a th:href="@{/logout-admin}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color:#DF8A8A;">Cerrar Sesión</a></li>
+    </ul>
+</nav>
+
+<div class="page">
+
+    <div class="breadcrumb">
+        <a href="/indexmes">Mesas</a>
+        <span>›</span>
+        
+        <span th:text="${mesa.idmesa != 0} ? 'Editar Mesa' : 'Nueva Mesa'">Nueva Mesa</span>
+    </div>
+
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-header-icon">🪑</div>
+            <div>
+                <h2 th:text="${mesa.idmesa != 0} ? 'Editar Mesa' : 'Nueva Mesa'">Nueva Mesa</h2>
+                <p th:text="${mesa.idmesa != 0} ? 'Modifica los datos de la mesa' : 'Registra una nueva mesa en el sistema'">
+                    Registra una nueva mesa en el sistema
+                </p>
+            </div>
+        </div>
+
+        
+        <form th:action="@{/guardarmes}" th:object="${mesa}" method="get">
+
+            
+            <input type="hidden" th:field="*{idmesa}"/>
+
+            <div class="form-body">
+
+                <div class="form-section-label">Datos de la Mesa</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>N° de Mesa</label>
+                        <input type="number" min="1"
+                               th:field="*{numero}"
+                               placeholder="Ej: 1"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Capacidad (personas)</label>
+                        <input type="number" min="1"
+                               th:field="*{capacidad}"
+                               placeholder="Ej: 4"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ubicación</label>
+                    <select th:field="*{ubicacion}">
+                        <option value="1er salon">1er Salón</option>
+                        <option value="2do salon">2do Salón</option>
+                        <option value="3er salon">3er Salón</option>
+                    </select>
+                </div>
+
+                <div class="form-section-label">Disponibilidad</div>
+
+                <div class="form-group">
+                    <label>Estado de la Mesa</label>
+                    <select th:field="*{disponible}">
+                        <option value="true">✔ Disponible</option>
+                        <option value="false">✖ Ocupada</option>
+                    </select>
+                    <p class="form-hint">Indica si la mesa está libre para recibir clientes</p>
+                </div>
+
+            </div>
+
+            <div class="form-footer">
+                <a href="/indexmes" class="btn-cancelar">← Cancelar</a>
+                <button type="submit" class="btn-guardar">Guardar Mesa</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<footer>
+    <p>Bar Restaurante Cordano &nbsp;·&nbsp; Jr. Áncash 202, Lima &nbsp;·&nbsp; Desde 1905</p>
+</footer>
+
+<form id="logout-form" th:action="@{/logout-admin}" method="post" style="display:none;"></form>
+</body>
+</html>

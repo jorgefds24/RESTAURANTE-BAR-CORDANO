@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-RestaubarcordanoApplication<restaubarcordano>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.springboot.restaubarcordano.RestaubarcordanoApplication",
+            "projectName": "restaubarcordano",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

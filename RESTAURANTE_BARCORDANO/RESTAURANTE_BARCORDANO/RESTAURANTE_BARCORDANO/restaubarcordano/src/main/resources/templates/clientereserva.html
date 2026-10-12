@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Hacer Reserva — Bar Cordano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=EB+Garamond:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --crema:#F5EDD8; --crema-suave:#FAF6ED; --crema-paper:#EDE5CC;
+            --cafe:#2C1508; --cafe-oscuro:#1A0A03; --cafe-medio:#5A2E12;
+            --oro:#C9963A; --oro-claro:#E8C06A; --borde:rgba(59,31,14,.15);
+            --borde-oro:rgba(201,150,58,.3); --texto:#3B1F0E;
+            --texto-muted:rgba(59,31,14,.45); --sombra:0 2px 20px rgba(44,21,8,.08);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'EB Garamond',Georgia,serif;background:var(--crema-suave);color:var(--texto);min-height:100vh;}
+        nav{background:var(--cafe-oscuro);border-bottom:2px solid var(--oro);height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 3rem;position:sticky;top:0;z-index:50;}
+        .nav-brand{font-family:'Playfair Display',serif;font-size:1.1rem;font-style:italic;color:var(--oro);text-decoration:none;}
+        .nav-links{display:flex;gap:2rem;list-style:none;}
+        .nav-links a{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(240,230,206,.5);text-decoration:none;transition:color .2s;}
+        .nav-links a:hover,.nav-links a.active{color:var(--oro);}
+        .nav-links a.logout{color:#DF8A8A;}
+        .nav-links a.logout:hover{color:#ff6b6b;}
+        .hero{background:var(--cafe);padding:2.5rem 3rem;border-bottom:1px solid rgba(201,150,58,.2);}
+        .hero p{font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(201,150,58,.7);margin-bottom:.4rem;}
+        .hero h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-style:italic;color:var(--crema);}
+        .page{max-width:750px;margin:0 auto;padding:2.5rem 2rem;}
+        .card{background:white;border:1px solid var(--borde);box-shadow:var(--sombra);margin-bottom:1.5rem;animation:fadeUp .4s ease both;}
+        .card-header{padding:1.2rem 1.8rem;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:.8rem;}
+        .card-header-icon{font-size:1.3rem;opacity:.7;}
+        .card-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-style:italic;font-weight:700;color:var(--cafe);}
+        .form-body{padding:1.8rem;}
+        .form-section-label{font-size:.6rem;letter-spacing:.38em;text-transform:uppercase;color:var(--oro);margin-bottom:1rem;margin-top:1.6rem;display:flex;align-items:center;gap:.7rem;}
+        .form-section-label:first-child{margin-top:0;}
+        .form-section-label::after{content:'';flex:1;height:1px;background:var(--borde);}
+        .form-group{margin-bottom:1.2rem;}
+        .form-group label{display:block;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--texto-muted);margin-bottom:.4rem;}
+        .form-group input,.form-group select,.form-group textarea{width:100%;font-family:'EB Garamond',serif;font-size:1rem;padding:.8rem 1rem;background:var(--crema-suave);border:1px solid var(--borde);color:var(--cafe);outline:none;transition:border-color .2s,background .2s;appearance:none;}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--oro);background:white;}
+        .form-group input[type="date"],.form-group input[type="time"]{color-scheme:light;}
+        /* ✅ Estilo para campo solo lectura */
+        .form-group input[readonly]{background:#EDE5CC;cursor:not-allowed;color:var(--cafe-medio);border-color:var(--borde-oro);font-weight:500;}
+        .form-group textarea{resize:vertical;min-height:80px;}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .form-hint{font-size:.72rem;color:var(--texto-muted);font-style:italic;margin-top:.3rem;}
+        .mesas-info{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-bottom:1rem;}
+        .mesa-chip{background:var(--crema-suave);border:1px solid var(--borde);padding:.7rem 1rem;text-align:center;}
+        .mesa-chip-num{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:900;color:var(--cafe);line-height:1;}
+        .mesa-chip-det{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--texto-muted);margin-top:.2rem;}
+        .mesa-chip.disponible{border-color:rgba(42,90,42,.3);background:rgba(42,90,42,.04);}
+        .mesa-chip.ocupada{border-color:rgba(139,26,26,.2);background:rgba(139,26,26,.03);opacity:.6;}
+        .form-footer{padding:1.5rem 1.8rem;border-top:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;}
+        .btn-enviar{font-family:'EB Garamond',serif;font-size:.8rem;letter-spacing:.25em;text-transform:uppercase;background:var(--cafe);color:var(--crema);border:none;cursor:pointer;padding:.9rem 2.5rem;transition:background .2s,transform .18s;}
+        .btn-enviar:hover{background:var(--cafe-medio);transform:translateY(-2px);}
+        .btn-cancelar{font-family:'EB Garamond',serif;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;background:transparent;color:var(--texto-muted);border:1px solid var(--borde);padding:.9rem 1.8rem;text-decoration:none;display:inline-block;transition:all .2s;}
+        .btn-cancelar:hover{border-color:var(--oro);color:var(--cafe);}
+        footer{text-align:center;padding:2rem;border-top:1px solid var(--borde);margin-top:2rem;}
+        footer p{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--texto-muted);}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="#" class="nav-brand">Bar Cordano · 1905</a>
+    <ul class="nav-links">
+        <li><a href="/PedidoCliente">Hacer Pedido</a></li>
+        <li><a href="/MispedidosCliente">Mis Pedidos</a></li>
+        <li><a href="/ReservaCliente" class="active">Hacer Reserva</a></li>
+        <li><a href="/MisreservasCliente">Mis Reservas</a></li>
+        <li><a th:href="@{/logout}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="logout">Cerrar Sesión</a></li>
+    </ul>
+</nav>
+
+<div class="hero">
+    <p>Bar Restaurante Cordano</p>
+    <h1>🪑 Hacer una Reserva</h1>
+</div>
+
+<div class="page">
+
+    <form th:action="@{/GuardarreservaCliente}" th:object="${reserva}" method="get">
+
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-header-icon">👤</span>
+                <span class="card-title">Mis Datos</span>
+            </div>
+            <div class="form-body">
+                <div class="form-section-label">Identificación</div>
+                <div class="form-group">
+                    <label>Nombre del cliente</label>
+                    
+                    <input type="text"
+                           th:value="${clienteActual != null ? clienteActual.nomcliente : 'Sesión no encontrada'}"
+                           readonly/>
+                    <p class="form-hint">✔ Reservando como este cliente</p>
+                    
+                    <input type="hidden"
+                           name="cliente.idcliente"
+                           th:value="${clienteActual != null ? clienteActual.idcliente : ''}"/>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-header-icon">📅</span>
+                <span class="card-title">Fecha, Hora y Personas</span>
+            </div>
+            <div class="form-body">
+                <div class="form-section-label">Cuándo nos visitas</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" th:field="*{fecha}"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora</label>
+                        <input type="time" th:field="*{hora}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>N° de personas</label>
+                    <input type="number" min="1" max="20"
+                           th:field="*{num_personas}"
+                           placeholder="Ej: 4"/>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="card">
+            <div class="card-header">
+                <span class="card-header-icon">🗺</span>
+                <span class="card-title">Mesa y Preferencias</span>
+            </div>
+            <div class="form-body">
+                <div class="form-section-label">Disponibilidad de mesas</div>
+
+                <div class="mesas-info">
+                    <div th:each="mes : ${listaMesas}"
+                         th:classappend="${mes.disponible} ? 'mesa-chip disponible' : 'mesa-chip ocupada'"
+                         class="mesa-chip">
+                        <div class="mesa-chip-num" th:text="'Mesa ' + ${mes.numero}"></div>
+                        <div class="mesa-chip-det" th:text="${mes.capacidad} + ' pers. · ' + ${mes.ubicacion}"></div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:1rem;">
+                    <label>Selecciona una mesa</label>
+                    <select name="mesa.idmesa">
+                        <option value="">— Selecciona una mesa —</option>
+                        <option th:each="mes : ${listaMesas}"
+                                th:if="${mes.disponible}"
+                                th:value="${mes.idmesa}"
+                                th:text="'Mesa ' + ${mes.numero} + ' · ' + ${mes.ubicacion} + ' · ' + ${mes.capacidad} + ' pers.'">
+                        </option>
+                    </select>
+                    <p class="form-hint">Solo se muestran las mesas disponibles</p>
+                </div>
+
+                <div class="form-section-label">Observaciones</div>
+                <div class="form-group">
+                    <label>¿Alguna preferencia? <span style="font-style:italic">(opcional)</span></label>
+                    <textarea th:field="*{observaciones}"
+                              placeholder="Cumpleaños, aniversario, mesa cerca a la ventana..."></textarea>
+                </div>
+
+                
+                <input type="hidden" name="estado" value="PENDIENTE"/>
+
+            </div>
+            <div class="form-footer">
+                <a href="/MisreservasCliente" class="btn-cancelar">← Cancelar</a>
+                <button type="submit" class="btn-enviar">Solicitar Reserva</button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<footer>
+    <p>Bar Restaurante Cordano &nbsp;·&nbsp; Jr. Áncash 202, Lima &nbsp;·&nbsp; Desde 1905</p>
+</footer>
+
+<form id="logout-form" th:action="@{/cerrar-cliente}" method="post" style="display:none;"></form>
+</body>
+</html>
